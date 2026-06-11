@@ -1,0 +1,56 @@
+import os
+import shutil
+
+# Defina o diretório que deseja organizar
+DIRETORIO_ALVO = os.path.expanduser("~/Downloads")
+
+# Mapeamento de extensões para suas respectivas pastas
+EXTENSOES = {
+    "Imagens": [".jpg", ".jpeg", ".png", ".gif", ".svg"],
+    "Documentos": [".pdf", ".docx", ".txt", ".xlsx", ".pptx"],
+    "Compactados": [".zip", ".rar", ".7z", ".tar.gz"],
+    "Instaladores": [".exe", ".msi", ".dmg"],
+}
+
+def organizar_pasta():
+    if not os.path.exists(DIRETORIO_ALVO):
+        print(f"O caminho {DIRETORIO_ALVO} não foi encontrado.")
+        return
+
+    for arquivo in os.listdir(DIRETORIO_ALVO):
+        caminho_completo = os.path.join(DIRETORIO_ALVO, arquivo)
+        
+        # Ignora se for uma pasta
+        if os.path.isdir(caminho_completo):
+            continue
+            
+        # Pega a extensão do arquivo
+        _, extensao = os.path.splitext(arquivo)
+        extensao = extensao.lower()
+
+        # Verifica em qual categoria o arquivo se encaixa
+        movido = False
+        for pasta_destino, extensoes_suportadas in EXTENSOES.items():
+            if extensao in extensoes_suportadas:
+                nova_pasta = os.path.join(DIRETORIO_ALVO, pasta_destino)
+                
+                # Cria a pasta se ela não existir
+                os.makedirs(nova_pasta, exist_ok=True)
+                
+                # Move o arquivo
+                shutil.move(caminho_completo, os.path.join(nova_pasta, arquivo))
+                print(f"Movido: {arquivo} -> {pasta_destino}/")
+                movido = True
+                break
+        
+        if not movido and extensao:
+            # Envia para uma pasta 'Outros' se não mapeado
+            pasta_outros = os.path.join(DIRETORIO_ALVO, "Outros")
+            os.makedirs(pasta_outros, exist_ok=True)
+            shutil.move(caminho_completo, os.path.join(pasta_outros, arquivo))
+            print(f"Movido: {arquivo} -> Outros/")
+
+if __name__ == "__main__":
+    print("Iniciando a organização da pasta...")
+    organizar_pasta()
+    print("Organização concluída!")
